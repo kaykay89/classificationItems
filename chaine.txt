@@ -1,0 +1,509 @@
+;**********************************************************************************************************
+;*       TP3: Programme de classification de codes d'items                                                *
+;*                                                                                                        *
+;*       Le programme prend les codes d'items entrÈ par l'utilisateur et les ordonne en ordre croissant.  *
+;*                                                                                                        *
+;*       Auteure: Kayla Louis  LOUK13628902                                                               *
+;*       Courriel: louis.kayla@courrier.uqam.ca                                                           *
+;*       Date: 27 juillet 2017                                                                            *
+;*       Cours: INF2170, groupe 20                                                                        *
+;**********************************************************************************************************
+;
+         STRO    txtDebut,d  
+debut:   STRO    txtDeman,d  
+         LDA     tabEntDo,i  
+         STA     -4,s        
+         SUBSP   4,i         ; #entCode #entTab
+         CALL    entreeDo    ; #retour
+         LDA     2,s            
+         BREQ    code0
+         CPA     -1,i
+         BREQ    invalide
+         CPA     -2,i
+         BREQ    inva       
+         BR      codeEnt     
+;
+code0:   ADDSP   4,i         ; #entCode #entTab
+         BR      debut      
+invalide:STRO    txtInval,d 
+         CHARO   '\n',i 
+inv:     CHARI   caraVide,d  ; vidange du tampon
+         LDA     0,i         
+         LDBYTEA caraVide,d  
+         CPA     '\n',i      
+         BREQ    debut       
+         BRNE    inv         
+         ADDSP   4,i         ;       #entCode #entTab
+         BR      debut       
+inva:    STRO    txtInval,d
+         CHARO   '\n',i 
+         BR      debut
+codeEnt: ADDSP   4,i         ;       #entCode #entTab
+fin:     STRO    txtFin,d    
+         STOP                
+;
+txtDebut:.ASCII  "Bienvenue dans ce programme de tri des codes d'items."
+         .ASCII  "\nUne fois les codes d'items entrÈs, le programme les ordonnera en ordre croissant."
+         .ASCII  "\nPour terminer le programme, il vous suffira de taper 'Enter'.\n\x00"
+txtDeman:.ASCII  "\nVeuillez entrer les codes d'items ‡ trier: \x00"
+txtInval:.ASCII  "\nEntrÈe invalide\n\x00"
+txtFin:  .ASCII  "\nFin normale du programme. Merci.\x00"
+;
+caraVide:.BLOCK  1           ; #1h
+tabEntDo:.BLOCK  8           ;  #8d
+;
+; TRAITEMENT DES DONN…ES ENTR…ES
+;
+entCompt:.EQUATE 0           ; #2d
+preceden:.EQUATE 2           ; #2h
+caract:  .EQUATE 4           ;#2h
+tete:    .EQUATE 6           ; #2h
+entreeX: .EQUATE 8           ; #2h
+entreeA: .EQUATE 10          ; #2h
+nbCara:  .EQUATE 12          ; #2d
+retour:  .EQUATE 14          ; #2h
+entTab:  .EQUATE 16          ; #2h adresse tableau
+entCode: .EQUATE 18          ; code d'erreur #2d
+;
+entreeDo:SUBSP   14,i        ;  #nbCara #entreeA #entreeX #tete #caract #preceden #entCompt
+         STA     entreeA,s   
+         STX     entreeX,s   
+         LDA     0,i  
+         STA     nbCara,s       
+         STA     entCompt,s  
+entDebut:LDA     0,i         
+         STA     entCode,s   
+         STA     tete,s      
+         STA     caract,s    
+         CHARI   caract,s       
+         LDBYTEA caract,s        
+         CPA     '\n',i      
+         BREQ    entEnter  
+         LDX     nbCara,s
+         ADDX    1,i  
+         STX     nbCara,s       
+         CPX     40,i
+         BRGT    entInval  
+         CPA     ' ',i       
+         BRNE    entSuite    
+espace:  CHARI   caract,s  
+         LDX     nbCara,s
+         ADDX    1,i  
+         STX     nbCara,s       
+         CPX     40,i
+         BRGT    entInval  
+         LDBYTEA caract,s    
+         CPA     '\n',i      
+         BREQ    sortie      
+         CPA     ' ',i       
+         BRNE    entSuite    
+         BR      espace      
+entSuite:CPA     '\n',i
+         BREQ    entInva2
+         CPA     'A',i       
+         BRLT    entInval    
+         CPA     'Z',i       
+         BRLE    entSAUT1    
+         BR      entInval    
+entSAUT1:LDX     entCompt,s  
+         ADDX    1,i         
+         STX     entCompt,s  
+         ADDX    1,i         
+         STBYTEA entTab,sxf  
+         CPX     3,i         
+         BRGE    continue    
+         CHARI   caract,s 
+         LDX     nbCara,s
+         ADDX    1,i  
+         STX     nbCara,s       
+         CPX     40,i
+         BRGT    entInval   
+         LDBYTEA caract,s    
+         BR      entSuite    
+continue:CHARI   caract,s 
+         LDX     nbCara,s
+         ADDX    1,i  
+         STX     nbCara,s       
+         CPX     40,i
+         BRGT    entInval   
+         LDBYTEA caract,s    
+         CPA     '*',i       
+         BRNE    entInval    
+entChiff:CHARI   caract,s
+         LDX     nbCara,s
+         ADDX    1,i  
+         STX     nbCara,s       
+         CPX     40,i
+         BRGT    entInval    
+         LDA     0,i         
+         LDBYTEA caract,s  
+         CPA     '\n',i
+         BREQ    entInva2  
+entChif1:CPA     '0',i       
+         BRLT    entInval    
+         CPA     '9',i       
+         BRLE    entNum      
+         CPA     'A',i       
+         BRLT    entInval    
+         CPA     'Z',i       
+         BRLE    entSuit1    
+         CPA     'a',i       
+         BRLT    entInval    
+         CPA     'z',i       
+         BRGT    entInval    
+entNum:  BR      entSuit1    
+entSuit1:LDX     entCompt,s  
+         ADDX    1,i         
+         STX     entCompt,s  
+         ADDX    1,i         
+         STBYTEA entTab,sxf  
+         CHARI   caract,s    
+         LDA     0,i         
+         LDBYTEA caract,s          
+         CPA     '\n',i      
+         BREQ    entFin
+         LDX     nbCara,s
+         ADDX    1,i  
+         STX     nbCara,s       
+         CPX     40,i
+         BRGT    entInval  
+         CPA     ' ',i       
+         BREQ    entFin    
+         BR      entChif1    
+entEnter:LDA     1,i         
+         STA     entCode,s   
+         BR      entFinal    
+entInval:LDA     -1,i        
+         STA     entCode,s   
+         BR      entFinal  
+entInva2:LDA     -2,i
+         STA     entCode,s
+         BR      entFinal  
+entFin:  LDA     entCompt,s  
+         LDX     0,i         
+         STA     entTab,sxf  
+         LDA     10,i        
+         CALL    new         ; #longueur #lettres2 #carac1 #carac2 #carac3 #carac4 #suivant
+;
+         STX     entreeX,s   
+         LDX     0,i         
+         LDA     entTab,sxf  
+         ADDX    entreeX,s   
+         STA     longueur,x  
+         LDX     2,i         
+         LDA     entTab,sxf  
+         LDX     entreeX,s   
+         STA     lettres2,x  
+         LDX     4,i         
+         LDA     0,i         
+         LDBYTEA entTab,sxf  
+         LDX     entreeX,s   
+         STBYTEA carac1,x    
+         LDA     entCompt,s  
+         SUBA    3,i         
+         BREQ    trois0      
+         LDX     5,i         
+         LDA     0,i         
+         LDBYTEA entTab,sxf  
+         LDX     entreeX,s   
+         STBYTEA carac2,x    
+         LDA     entCompt,s  
+         SUBA    4,i         
+         BREQ    deux0       
+         LDX     6,i         
+         LDA     0,i         
+         LDBYTEA entTab,sxf  
+         LDX     entreeX,s   
+         STBYTEA carac3,x    
+         LDA     entCompt,s  
+         SUBA    5,i         
+         BREQ    un0         
+         LDX     7,i         
+         LDA     0,i         
+         LDBYTEA entTab,sxf  
+         LDX     entreeX,s   
+         STBYTEA carac4,x    
+         BR      entTete     
+;
+trois0:  LDA     0,i         
+         STBYTEA carac2,x    
+deux0:   LDA     0,i         
+         STBYTEA carac3,x    
+un0:     LDA     0,i         
+         STBYTEA carac4,x    
+;
+entTete: LDX     tete,s      ;
+         BRNE    tri         
+         LDX     entreeX,s   
+         LDA     tete,s      
+         STA     suivant,x   
+         STX     tete,s      
+         BR      autre       
+;
+tri:     LDX     tete,s      
+         LDA     0,i         
+         STA     preceden,s  
+tri1:    LDA     0,i         
+         LDBYTEA lettres2,x  
+         CPA     'a',i       
+         BRLT    tri1A       
+         ANDA    0xFFDF,i    
+tri1A:   STA     entreeA,s   
+         STX     entCompt,s  
+         LDX     entreeX,s   
+         LDBYTEA lettres2,x  
+         CPA     'a',i       
+         BRLT    tri1B       
+         ANDA    0xFFDF,i    
+tri1B:   CPA     entreeA,s   
+         BRLT    insertAv    
+         BREQ    tri2        
+         LDX     entCompt,s  
+         LDA     suivant,x   
+         CPA     0,i         
+         BREQ    insertAp    
+         STX     preceden,s  
+         LDX     suivant,x   
+         BR      tri1        
+;
+tri2:    LDX     entCompt,s  
+         ADDX    1,i         
+         LDA     0,i         
+         LDBYTEA lettres2,x  
+         CPA     'a',i       
+         BRLT    tri2A       
+         ANDA    0xFFDF,i    
+tri2A:   STA     entreeA,s   
+         LDX     entreeX,s   
+         ADDX    1,i         
+         LDBYTEA lettres2,x  
+         CPA     'a',i       
+         BRLT    tri2B       
+         ANDA    0xFFDF,i    
+tri2B:   CPA     entreeA,s   
+         BRLT    insertAv    
+         BREQ    triLong     
+         LDX     entCompt,s  
+         LDA     suivant,x   
+         CPA     0,i         
+         BREQ    insertAp    
+         STX     preceden,s  
+         LDX     suivant,x   
+         BR      tri1        
+;
+triLong: LDX     entCompt,s  
+         LDA     longueur,x  
+         STA     entreeA,s   
+         LDX     entreeX,s   
+         LDA     longueur,x  
+         CPA     entreeA,s   
+         BRLT    insertAv    
+         BREQ    triLong1    
+         LDX     entCompt,s  
+         LDA     suivant,x   
+         CPA     0,i         
+         BREQ    insertAp    
+         STX     preceden,s  
+         LDX     suivant,x   
+         BR      tri1        
+;
+triLong1:LDX     entCompt,s  
+         LDA     0,i         
+         LDBYTEA carac1,x    
+         CPA     'a',i       
+         BRLT    triLongA    
+         ANDA    0xFFDF,i    
+triLongA:STA     entreeA,s   
+         LDX     entreeX,s   
+         LDBYTEA carac1,x    
+         CPA     'a',i       
+         BRLT    triLongB    
+         ANDA    0xFFDF,i    
+triLongB:CPA     entreeA,s   
+         BRLT    insertAv    
+         BREQ    triLong2    
+         LDX     entCompt,s  
+         LDA     suivant,x   
+         CPA     0,i         
+         BREQ    insertAp    
+         STX     preceden,s  
+         LDX     suivant,x   
+         BR      tri1        
+;
+triLong2:LDX     entCompt,s  
+         LDA     0,i         
+         LDBYTEA carac2,x    
+         CPA     'a',i       
+         BRLT    triLongC    
+         ANDA    0xFFDF,i    
+triLongC:STA     entreeA,s   
+         LDX     entreeX,s   
+         LDBYTEA carac2,x    
+         CPA     'a',i       
+         BRLT    triLongD    
+         ANDA    0xFFDF,i    
+triLongD:CPA     entreeA,s   
+         BRLT    insertAv    
+         BREQ    triLong3    
+         LDX     entCompt,s  
+         LDA     suivant,x   
+         CPA     0,i         
+         BREQ    insertAp    
+         STX     preceden,s  
+         LDX     suivant,x   
+         BR      tri1        
+;
+triLong3:LDX     entCompt,s  
+         LDA     0,i         
+         LDBYTEA carac3,x    
+         CPA     'a',i       
+         BRLT    triLongE    
+         ANDA    0xFFDF,i    
+triLongE:STA     entreeA,s   
+         LDX     entreeX,s   
+         LDBYTEA carac3,x    
+         CPA     'a',i       
+         BRLT    triLongF    
+         ANDA    0xFFDF,i    
+triLongF:CPA     entreeA,s   
+         BRLT    insertAv    
+         BREQ    triLong4    
+         LDX     entCompt,s  
+         LDA     suivant,x   
+         CPA     0,i         
+         BREQ    insertAp    
+         STX     preceden,s  
+         LDX     suivant,x   
+         BR      tri1        
+;
+triLong4:LDX     entCompt,s  
+         LDA     0,i         
+         LDBYTEA carac4,x    
+         CPA     'a',i       
+         BRLT    triLongG    
+         ANDA    0xFFDF,i    
+triLongG:STA     entreeA,s   
+         LDX     entreeX,s   
+         LDBYTEA carac4,x    
+         CPA     'a',i       
+         BRLT    triLongH    
+         ANDA    0xFFDF,i    
+triLongH:CPA     entreeA,s   
+         BRLE    insertAv    
+         LDX     entCompt,s  
+         LDA     suivant,x   
+         CPA     0,i         
+         BREQ    insertAp    
+         STX     preceden,s  
+         LDX     suivant,x   
+         BR      tri1        
+;
+insertAv:LDX     entCompt,s  
+         CPX     heap,i      
+         BREQ    insertpr    
+         CPX     tete,s      
+         BREQ    insertp     
+         LDX     preceden,s  
+         LDA     entreeX,s   
+         STA     suivant,x   
+         LDX     entreeX,s   
+         LDA     entCompt,s  
+         STA     suivant,x   
+         BR      autre       
+;
+insertpr:LDX     entreeX,s   
+         LDA     heap,i      
+         STA     suivant,x   
+         LDX     entreeX,s   
+         STX     tete,s      
+         BR      autre       
+;
+insertp: LDX     entreeX,s   
+         LDA     tete,s      
+         STA     suivant,x   
+         LDX     entreeX,s   
+         STX     tete,s      
+         BR      autre       
+;
+insertAp:LDA     0,i         
+         LDX     entreeX,s   
+         STA     suivant,x   
+         LDX     entCompt,s  
+         LDA     entreeX,s   
+         STA     suivant,x   
+;
+autre:   LDA     0,i         
+         LDBYTEA caract,s    
+         CPA     '\n',i      
+         BREQ    sortie      
+cherche: CHARI   caract,s
+         LDX     nbCara,s
+         ADDX    1,i  
+         STX     nbCara,s       
+         CPX     40,i
+         BRGT    entInval     
+         LDBYTEA caract,s    
+         CPA     ' ',i       
+         BREQ    cherche     
+         LDX     0,i         
+         STX     entCompt,s  
+         BR      entSuite    
+;
+sortie:  LDX     tete,s 
+         CHARO   '\n',i     
+         CHARO   '-',i       
+         CHARO   '-',i       
+         CHARO   '>',i       
+         CHARO   ' ',i       
+sortieS: CPX     0,i         
+         BREQ    entFinal    
+         CHARO   '-',i       
+         CHARO   '-',i       
+         CHARO   '>',i       
+         CHARO   ' ',i       
+         LDA     longueur,x  
+         CHARO   lettres2,x  
+         ADDX    1,i         
+         CHARO   lettres2,x  
+         SUBX    1,i         
+         CHARO   '*',i       
+         CHARO   carac1,x    
+         SUBA    3,i         
+         BREQ    chiffre1    
+         LDA     longueur,x  
+         CHARO   carac2,x    
+         SUBA    4,i         
+         BREQ    chiffre1    
+         LDA     longueur,x  
+         CHARO   carac3,x    
+         SUBA    5,i         
+         BREQ    chiffre1    
+         LDA     longueur,x  
+         CHARO   carac4,x    
+         SUBA    6,i         
+         BREQ    chiffre1    
+chiffre1:CHARO   ' ',i       
+         LDX     suivant,x   
+         BR      sortieS     
+entFinal:CHARO   '\n',i
+         ADDSP   14,i        ; #nbCara #entreeA #entreeX #tete #caract #preceden #entCompt
+         RET0                
+;
+; LISTE CHAÓN…E
+;
+longueur:.EQUATE 0           ; #2d
+lettres2:.EQUATE 2           ; #2h
+carac1:  .EQUATE 4           ; #1h
+carac2:  .EQUATE 5           ; #1h
+carac3:  .EQUATE 6           ; #1h
+carac4:  .EQUATE 7           ; #1h
+suivant: .EQUATE 8           ; #2h
+;
+new:     LDX     hpPtr,d     
+         ADDA    hpPtr,d     
+         STA     hpPtr,d     
+         RET0                
+;
+hpPtr:   .ADDRSS heap        
+heap:    .BLOCK  1           
+         .END                  

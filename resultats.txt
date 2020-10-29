@@ -1,0 +1,25 @@
+Bienvenue dans ce programme de tri des codes d'items.
+Une fois les codes d'items entrés, le programme les ordonnera en ordre croissant.
+Pour terminer le programme, il vous suffira de taper 'Enter'.
+
+Veuillez entrer les codes d'items à trier: 
+--> --> AB*1A --> AB*12a --> AB*1234 --> AZ*12 --> CD*1234 
+
+Veuillez entrer les codes d'items à trier: 
+--> --> AB*b --> AB*111 --> AB*a12 --> AB*1110 --> AB*1111 
+
+Veuillez entrer les codes d'items à trier: 
+--> --> AB*1 --> AB*1 --> AB*11 --> BA*11 --> BA*111 --> BA*1111 
+
+Veuillez entrer les codes d'items à trier: 
+--> --> ZZ*z --> ZZ*aa --> ZZ*b1 --> ZZ*Ba --> ZZ*1234 --> ZZ*1256 
+
+Veuillez entrer les codes d'items à trier: 
+--> --> AA*1 --> AA*2 --> AA*3 --> AA*4 --> AA*5 --> AA*6 --> AA*7 --> AA*8 
+
+Veuillez entrer les codes d'items à trier: 
+--> 
+
+Veuillez entrer les codes d'items à trier: 
+
+Fin normale du programme. Merci.
